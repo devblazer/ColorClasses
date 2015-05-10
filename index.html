@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Color Classes Example</title>
+    <script type="text/javascript" src="require.js"></script>
+    <script type="text/javascript">
+        require.config({
+            baseUrl: "/colorClassExample/js"
+        });
+    </script>
+</head>
+<body>
+
+<script type="text/javascript">
+    require(['Color32'],function(Color32){
+        Color32.prototype.addColorDefinition('YELLOW',255,255,0);
+        var col = new Color32(Color32.prototype.YELLOW);
+        var col2 = new Color32(Color32.prototype.GREEN,0.75);
+        col.merge(col2);
+        console.log(col.r);
+    });
+</script>
+</body>
+</html>
