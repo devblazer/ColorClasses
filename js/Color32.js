@@ -21,6 +21,8 @@
      */
     var _construct = function(hexStringOrRedComponent, alphaOrGreenComponent, blueComponent, alphaComponent) {
         var args = [];
+        var color = ['r','g','b'];
+        var _hexAlpha = null;
         var me = this;
         for (var p=0;p<arguments.length;p++)
             args.push(arguments[p]);
@@ -36,15 +38,43 @@
             Color24.apply(this,args);
         }
 
+        var parentCall = this.callInternal;
+        var pfunctions = {};
+        this.callInternal = function(name,args) {
+            return pfunctions[name].apply(this,args);
+        };
+
+        /**
+         * @property {int} r The red color component (0-255)
+         * @property {int} g The green color component (0-255)
+         * @property {int} b The blue color component (0-255)
+         */
+        for (var p in color) {
+            (function(c){
+                pfunctions['get'+ c.toUpperCase()] = function() {
+                    return parentCall('get'+ c.toUpperCase(),[]);
+                };
+                pfunctions['set'+ c.toUpperCase()] = function(val) {
+                    parentCall('set'+c.toUpperCase(),[val]);
+                    _hexAlpha = null;
+                };
+                Object.defineProperty(me,c,{
+                    configurable:true,
+                    get:pfunctions['get'+ c.toUpperCase()],
+                    set:pfunctions['set'+ c.toUpperCase()]
+                });
+            }(color[p]));
+        }
         /**
          * @property {float} a The alpha component (0.0 - 1.0)
          */
         Object.defineProperty(this,'a',{
+            configurable:true,
             get:function() {
                 return a;
             },
             set:function(val) {
-                if (!me.validAlphaComponent(val))
+                if (!this.validAlphaComponent(val))
                     throw new Error( "Value of a is invalid: "+val);
                 a = val;
             }
@@ -53,13 +83,17 @@
          * @property {string} hex The 4-6 digit hex alpha color string
          */
         Object.defineProperty(this,'hexAlpha',{
+            configurable:true,
             get:function() {
-                return me.rgba2hexAlpha(me.r,me.g,me.b,me.a);
+                if (!_hexAlpha)
+                    _hexAlpha = this.rgba2hexAlpha(this.r,this.g,this.b,this.a);
+                return _hexAlpha;
             },
             set:function(hexAlpha) {
-                if (!me.validHexAlphaColor(hexAlpha))
+                if (!this.validHexAlphaColor(hexAlpha))
                     throw new Error( "Hex-alpha color string is invalid: "+hexAlpha);
-                var color = me.hexAlpha2rgba(hexAlpha);
+                _hexAlpha = hexAlpha;
+                var color = this.hexAlpha2rgba(hexAlpha);
                 this.r = color.r;
                 this.g = color.g;
                 this.b = color.b;

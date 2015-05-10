@@ -19,6 +19,11 @@
         var color = {r:0,g:0,b:0};
         var me = this;
 
+        var pfunctions = {};
+        this.callInternal = function(name,args) {
+            return pfunctions[name].apply(this,args);
+        };
+
         /**
          * @property {int} r The red color component (0-255)
          * @property {int} g The green color component (0-255)
@@ -26,16 +31,19 @@
          */
         for (var p in color) {
             (function(c){
+                pfunctions['get'+ c.toUpperCase()] = function() {
+                    return color[c];
+                };
+                pfunctions['set'+ c.toUpperCase()] = function(val) {
+                    if (!me.validColorComponent(val))
+                        throw new Error("Value of "+c+" is invalid: "+val);
+                    color[c] = val;
+                    color.hex = null;
+                };
                 Object.defineProperty(me,c,{
-                    get:function() {
-                        return color[c];
-                    },
-                    set:function(val) {
-                        if (!me.validColorComponent(val))
-                            throw new Error("Value of "+c+" is invalid: "+val);
-                        color[c] = val;
-                        color.hex = null;
-                    }
+                    configurable:true,
+                    get:pfunctions['get'+ c.toUpperCase()],
+                    set:pfunctions['set'+ c.toUpperCase()]
                 });
             }(p));
         }
@@ -43,18 +51,21 @@
          * @property {string} hex The 3-6 digit hex color string
          */
         color.hex = null;
+        pfunctions.getHex = function() {
+            if (color.hex === null)
+                color.hex = me.rgb2hex(color.r,color.g,color.b);
+            return color.hex;
+        };
+        pfunctions.setHex = function(hex) {
+            if (!me.validHexColor(hex))
+                throw new Error( "Hex color string is invalid: "+hex);
+            color = me.hex2rgb(hex);
+            color.hex = hex;
+        };
         Object.defineProperty(this,'hex',{
-            get:function() {
-                if (color.hex === null)
-                    color.hex = me.rgb2hex(color.r,color.g,color.b);
-                return color.hex;
-            },
-            set:function(hex) {
-                if (!me.validHexColor(hex))
-                    throw new Error( "Hex color string is invalid: "+hex);
-                color = me.hex2rgb(hex);
-                color.hex = hex;
-            }
+            configurable:true,
+            get:pfunctions.getHex,
+            set:pfunctions.setHex
         });
 
         if (arguments.length == 1)

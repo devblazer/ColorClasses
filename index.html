@@ -13,11 +13,15 @@
 
 <script type="text/javascript">
     require(['Color32'],function(Color32){
-        Color32.prototype.addColorDefinition('YELLOW',255,255,0);
-        var col = new Color32(Color32.prototype.YELLOW);
+        var col1 = new Color32(Color32.prototype.RED);
         var col2 = new Color32(Color32.prototype.GREEN,0.75);
-        col.merge(col2);
-        console.log(col.r);
+        col1.r = 1;
+        col2.r = 10;
+        console.log(col1.r);
+        console.log(col2.r);
+        var col3 = new Color32('#ff0000');
+        console.log(col2.r);
+        console.log(col3.r);
     });
 </script>
 </body>
