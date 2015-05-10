@@ -34,9 +34,8 @@
             a = comp.a;
             Color24.call(this,comp.r,comp.g,comp.r);
         }
-        else {
+        else
             Color24.apply(this,args);
-        }
 
         var parentCall = this.callInternal;
         var pfunctions = {};
