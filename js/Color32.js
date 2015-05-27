@@ -32,7 +32,7 @@
         if (args.length==1&&this.validHexAlphaColor(args[0])) {
             var comp = this.hexAlpha2rgba(args[0]);
             a = comp.a;
-            Color24.call(this,comp.r,comp.g,comp.r);
+            Color24.call(this,comp.r,comp.g,comp.b);
         }
         else
             Color24.apply(this,args);
